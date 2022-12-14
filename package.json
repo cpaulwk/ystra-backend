@@ -6,6 +6,7 @@
     "start": "nodemon --delay 2.5 ./bin/www"
   },
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
@@ -13,7 +14,8 @@
     "express": "~4.16.1",
     "mongoose": "^6.8.0",
     "morgan": "~1.9.1",
-    "openai": "^3.1.0"
+    "openai": "^3.1.0",
+    "uid2": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"

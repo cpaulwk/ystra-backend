@@ -5,10 +5,16 @@ const {checkBody} =require('../modules/checkBody');
 const SearchImg= require('../models/searchs');
 const User= require('../models/users');
 
-router.get('/all',(req,res)=>{
+router.get('/all/:token',(req,res)=>{
 
-    SearchImg.find({user_id:0}).populate('imageResult').then(data=>{
-        res.json({result:true, Images: data  })
+    User.findOne({token:req.params.token}).then(data=>{
+        if(data){
+            SearchImg.find({user_id:data._id}).populate('imageResult').then(data=>{
+                res.json({result:true, Images: data  })
+            })
+        }else{
+            res.json({ result: false, error: 'User not found' });
+        }
     })
 
 })
