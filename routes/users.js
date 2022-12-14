@@ -36,11 +36,12 @@ router.post('/signup',(req, res) =>{
 })
 
 router.post ('/signin',(req,res)=>{
-  if (!checkBody(req.body, ['username','email'])) {
+  if (!checkBody(req.body, ['username','password'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
   }
 
+  const {username, password}=req.body;
   User.findOne({username:username}).then(data=>{
     if (data && bcrypt.compareSync(password, data.password)) {
       res.json({ result: true, token: data.token });
