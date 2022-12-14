@@ -1,34 +1,32 @@
 var express = require('express');
 var router = express.Router();
 const {checkBody} =require('../modules/checkBody');
-const {csOpenai} =require ('../classes/csOpenai');
+const {ApiOpenai} =require ('../classes/csOpenai');
 
 const imageResult= require('../models/image_results');
 const SearchImg= require('../models/searchs');
 const User= require('../models/users');
 
-const apiKey='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';
+// const apiKey='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';
 
-router.get('/:token', (req, res, next)=>{
-  if (!checkBody(req.body, ['queryKey'])) {
+router.get('/', (req, res, next)=>{
+  if (!checkBody(req.body, ['queryKey','token'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
   }
-  User.findOne({token:req.params.token}).then(async(theUser)=>{
+  User.findOne({token:req.body.token}).then(async(theUser)=>{
     if (theUser && theUser.nbRequest>0 ){
       const {queryKey}= req.body;
 
-      let ImagAI = new csOpenai(apiKey)
-      await ImagAI.generate(queryKey,1,"1024x1024")
+      let ImagAI = new ApiOpenai()
+      await ImagAI.generate(queryKey,1,"")
     
       if(ImagAI.Result){
     
         User.updateOne(
           { _id: theUser._id },
           { $inc: { nbRequest: -1} }
-       ).then(upda=>{
-        
-       })
+        ).then(updateDoc=>{  })
 
         const {data} =ImagAI.Result;
         const arrayImageId =await data.map(element => {
@@ -39,8 +37,7 @@ router.get('/:token', (req, res, next)=>{
             imageIA.save().then(newDoc => {
               // res.json({ result: true, token: newDoc });
             });
-            return imageIA._id
-            
+            return imageIA._id            
         });
     
         if (arrayImageId.length>0) {
@@ -56,10 +53,7 @@ router.get('/:token', (req, res, next)=>{
           })
         }else{
           res.json({result:false,data:[] });
-        }    
-        
-
-      
+        }         
       
       }else{
         res.json({result:false });

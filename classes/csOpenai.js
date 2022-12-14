@@ -1,20 +1,33 @@
 const { Configuration, OpenAIApi } = require("openai");
 
-class csOpenai {
-    constructor(inApiKey) {
-        this.inApiKey=inApiKey;
+class ApiOpenai {
+    constructor() {        
         this.configuration = new Configuration({
-            apiKey:inApiKey,
+            apiKey:process.env.OPENAI_API_KEY ||'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',
           });
     }
+    
     async generate(inQueryKey,inCountRslt,inResolution ){
-        const openai = new OpenAIApi(this.configuration);
-        const response = await openai.createImage({
-          prompt: inQueryKey,
-          n: inCountRslt,
-          size: inResolution,
-        });
-        this.arrayResult=response.data;
+
+      if(inQueryKey && inCountRslt>0){
+          const openai = new OpenAIApi(this.configuration);
+          const response = await openai.createImage({
+            prompt: inQueryKey,
+            n: (inCountRslt > 2)? 2 : inCountRslt ,
+            size: this.checkSize(inResolution) ,
+          });
+          this.arrayResult=response.data;
+      }
+    }
+
+    // 256x256, 512x512, or 1024x1024
+    checkSize (params) {
+      let tabSize=['256x256','512x512','1024x1024'];
+      if(tabSize.includes(params)){
+        return params;
+      }else{
+        return '256x256';
+      }
     }
 
     async generateWithImage(inQueryKey,url){
@@ -41,11 +54,9 @@ class csOpenai {
           }
     }
 
-
-
     get Result() {
         return this.arrayResult;
     }
 }
 
-module.exports = { csOpenai };
+module.exports = { ApiOpenai };
