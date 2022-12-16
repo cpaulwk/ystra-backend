@@ -13,6 +13,7 @@ var userGalleryRouter= require("./routes/userGallery");
 var productsRouter= require("./routes/products");
 var app = express();
 
+
 const cors = require("cors");
 app.use(cors());
 
