@@ -25,7 +25,7 @@ router.post('/', (req, res, next)=>{
       const {queryKey}= req.body;
 
       let ImagAI = new ApiOpenai()
-      await ImagAI.generate(queryKey,4,"")
+      await ImagAI.generate(queryKey,4,"")//.catch(err => console.error(err))
     
       if(ImagAI.Result){
     
@@ -106,7 +106,11 @@ router.post('/', (req, res, next)=>{
 
         downloadAI(data).then((n)=>{
           console.log ('End downloadAI' ,n)
-        }).catch(err => console.error(err));
+        }).catch(err => ()=>{
+          console.error(err);
+          res.json({result:false ,error :err});
+          
+        });
         
 
       }else{
