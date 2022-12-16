@@ -13,7 +13,7 @@ class ApiOpenai {
           const openai = new OpenAIApi(this.configuration);
           const response = await openai.createImage({
             prompt: inQueryKey,
-            n: (inCountRslt > 2)? 2 : inCountRslt ,
+            n: (inCountRslt > 4)? 4 : inCountRslt ,
             size: this.checkSize(inResolution) ,
           });
           this.arrayResult=response.data;
