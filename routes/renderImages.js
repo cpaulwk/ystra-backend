@@ -69,6 +69,7 @@ router.post('/', (req, res, next)=>{
         function uploadToCloudinary(image) {
           return new Promise((resolve, reject) => {
             cloudinary.uploader.upload(image, (err, url) => {
+              fs.unlinkSync(image);
               if (err) return reject(err);
               return resolve(url.secure_url);
             })
