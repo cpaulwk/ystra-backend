@@ -2,14 +2,20 @@ var express = require('express');
 var router = express.Router();
 const {checkBody} =require('../modules/checkBody');
 const {ApiOpenai} =require ('../classes/csOpenai');
+const uniqid = require('uniqid');
+const fetch=require('node-fetch');
+const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 const imageResult= require('../models/image_results');
 const SearchImg= require('../models/searchs');
 const User= require('../models/users');
 
+
+
 // const apiKey='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';
 
-router.get('/', (req, res, next)=>{
+router.post('/', (req, res, next)=>{
   if (!checkBody(req.body, ['queryKey','token'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
@@ -19,7 +25,7 @@ router.get('/', (req, res, next)=>{
       const {queryKey}= req.body;
 
       let ImagAI = new ApiOpenai()
-      await ImagAI.generate(queryKey,1,"")
+      await ImagAI.generate(queryKey,4,"")
     
       if(ImagAI.Result){
     
@@ -29,36 +35,82 @@ router.get('/', (req, res, next)=>{
         ).then(updateDoc=>{  })
 
         const {data} =ImagAI.Result;
-        const arrayImageId =await data.map(element => {
+
+        function downloadAI(tabResult) {
+          return new Promise((resolve, reject) => {
+            const tabTask=[];
+            for (let index = 0; index < tabResult.length; index++) {
+              fetch(tabResult[index].url)
+              .then((res) =>{            
+                const imagePath = `./tmp/${uniqid()}.png`; 
+                // This opens up the writeable stream to `output`
+                const writeStream = fs.createWriteStream(imagePath);
+                res.body.pipe(writeStream);
+    
+                writeStream.on('finish', ()=> {  
+                uploadToCloudinary(imagePath).then((n)=>{
+                  tabTask.push(n);         
+                  //console.log('resultCloudinary.secure_url',n);
+                }).then(()=>{
+                  if(tabTask.length === tabResult.length)  {
+                    SaveInDB(tabTask);
+                    resolve(tabTask);
+                  } 
+                });
+              });            
+                console.log('close');
+              })
+            }
+            //resolve(tabTask);
+              // if (err) return reject(err);
+          });
+        }
+
+        function uploadToCloudinary(image) {
+          return new Promise((resolve, reject) => {
+            cloudinary.uploader.upload(image, (err, url) => {
+              if (err) return reject(err);
+              return resolve(url.secure_url);
+            })
+          });
+        }
+
+        // Apres upload Cloudinary ==> Enregistrement des images sur DB
+        function SaveInDB(tabImgUp) {
+
+          let arrayImageId=[];
+          for (const newUrl of tabImgUp) {
             const imageIA= new imageResult({
-              url: element.url,
+              url: newUrl,
             });
-    
-            imageIA.save().then(newDoc => {
-              // res.json({ result: true, token: newDoc });
+            imageIA.save();
+            arrayImageId.push(imageIA._id);
+          }
+
+          if (arrayImageId.length>0) {
+            const newQuery= new SearchImg({
+              user_id:theUser._id,
+              textSearch: queryKey,
+              dateSearch: Date.now(),
+              imageResult:arrayImageId
             });
-            return imageIA._id            
+        
+            newQuery.save().then((newDoc)=>{
+              res.json({result:true, data: tabImgUp });
+            })
+          }else{
+            res.json({result:false,data:[] });
+          }  
+        }
+
+        downloadAI(data).then((n)=>{
+          console.log ('End downloadAI' ,n)
         });
-    
-        if (arrayImageId.length>0) {
-          const newQuery= new SearchImg({
-            user_id:theUser._id,
-            textSearch: queryKey,
-            dateSearch: Date.now(),
-            imageResult:arrayImageId
-          })
-      
-          newQuery.save().then((newDoc)=>{
-            res.json({result:true, data: ImagAI.Result });
-          })
-        }else{
-          res.json({result:false,data:[] });
-        }         
-      
+
       }else{
         res.json({result:false });
       }
-    
+
     }else{
       if (theUser && !theUser.nbRequest>0 ){ 
         res.json({ result: false, error: 'No credits' });
@@ -68,9 +120,6 @@ router.get('/', (req, res, next)=>{
     }
 
   })
-
-
-
 
 
 })
