@@ -106,7 +106,8 @@ router.post('/', (req, res, next)=>{
 
         downloadAI(data).then((n)=>{
           console.log ('End downloadAI' ,n)
-        });
+        }).catch(err => console.error(err));
+        
 
       }else{
         res.json({result:false });
