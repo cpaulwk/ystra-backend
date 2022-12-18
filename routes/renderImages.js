@@ -16,6 +16,8 @@ const User= require('../models/users');
 // const apiKey='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';
 
 router.post('/', (req, res, next)=>{
+
+try {
   if (!checkBody(req.body, ['queryKey','token'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
@@ -25,7 +27,7 @@ router.post('/', (req, res, next)=>{
       const {queryKey}= req.body;
 
       let ImagAI = new ApiOpenai()
-      await ImagAI.generate(queryKey,4,"")//.catch(err => console.error(err))
+      await ImagAI.generate(queryKey,2,"")//.catch(err => console.error(err))
     
       if(ImagAI.Result){
     
@@ -85,7 +87,7 @@ router.post('/', (req, res, next)=>{
               url: newUrl,
             });
             imageIA.save();
-            arrayImageId.push(imageIA._id);
+            arrayImageId.push(imageIA);
           }
 
           if (arrayImageId.length>0) {
@@ -93,12 +95,15 @@ router.post('/', (req, res, next)=>{
               user_id:theUser._id,
               textSearch: queryKey,
               dateSearch: Date.now(),
-              imageResult:arrayImageId
+              imageResult:arrayImageId.map(val=> val._id)
             });
         
-            newQuery.save().then((newDoc)=>{
-              res.json({result:true, data: tabImgUp });
-            })
+            newQuery.save().then(
+              (newDoc)=>{
+              res.json({result:true, data: arrayImageId });
+              
+            }
+            )
           }else{
             res.json({result:false,data:[] });
           }  
@@ -127,8 +132,26 @@ router.post('/', (req, res, next)=>{
 
   })
 
+} catch (error) {
+  res.json({ result: false, error: 'User not found' });
+}
+
+
 
 })
 
+
+router.post ('/checked',(req,res,next)=>{
+  if (!checkBody(req.body, ['imageId','token'])) {
+    res.json({ result: false, error: 'Missing or empty fields' });
+    return;
+  }
+  const {token,imageId}=req.body;
+  User.findOne({token:token}).then(theUser=>{
+      imageResult.updateOne({_id:imageId},{isChecked:true}).then(updaeDoc=>{
+        res.json({result:true})
+      })
+  })
+})
 
 module.exports=router;
