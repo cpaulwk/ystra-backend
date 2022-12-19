@@ -22,7 +22,8 @@ router.post('/signup',(req, res) =>{
         username: username, 
         password: hash,
         email: email,
-        token: uid2(32) 
+        token: uid2(32),
+        nbRequest:10 
       })
 
       newUser.save().then((newDoc)=>{
