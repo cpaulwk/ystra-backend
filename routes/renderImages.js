@@ -81,6 +81,7 @@ router.post("/", (req, res, next) => {
             for (const newUrl of tabImgUp) {
               const imageIA = new imageResult({
                 url: newUrl,
+                isChecked: false,
               });
               imageIA.save();
               arrayImageId.push(imageIA);
@@ -144,4 +145,3 @@ router.post("/checked", (req, res, next) => {
 });
 
 module.exports = router;
-
