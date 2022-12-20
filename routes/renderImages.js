@@ -123,7 +123,7 @@ router.post("/", (req, res, next) => {
       }
     });
   } catch (error) {
-    res.json({ result: false, error: "User not found" });
+    res.json({ result: false, error: `User not found   ==> ${error}` });
   }
 });
 
