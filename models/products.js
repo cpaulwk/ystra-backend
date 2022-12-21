@@ -4,7 +4,7 @@ const productSchema = mongoose.Schema({
     nameProduct: String,
     typeProduct: String, 
     priceProduct: Number, 
-    variationProduct: Boolean, 
+    variationProduct: Number, 
     dateCreationProduct: Date,
     isDeleted: Date, 
     deleteDate: Date,

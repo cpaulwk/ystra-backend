@@ -13,7 +13,104 @@ const User = require("../models/users");
 
 // const apiKey='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';
 
+
 router.post("/", (req, res, next) => {
+  try {
+    if (!checkBody(req.body, ["queryKey", "token"])) {
+      res.json({ result: false, error: "Missing or empty fields" });
+      return;
+    }
+    User.findOne({ token: req.body.token }).then(async (theUser) => {
+      if (theUser && theUser.nbRequest > 0) {
+        const { queryKey } = req.body;
+
+        let ImagAI = new ApiOpenai();
+        await ImagAI.generate(queryKey, 4, ""); 
+        if (ImagAI.Result) {
+          User.updateOne(
+            { _id: theUser._id },
+            { $inc: { nbRequest: -1 } }
+          ).then((updateDoc) => {});
+
+          const { data } = ImagAI.Result;
+          let arrayImageId = [];
+          for (let index = 0; index < data.length; index++) {     
+              //const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+              // const resultCloudinary = await cloudinary.uploader
+              // .upload(data[index].url,
+              //   { responsive_breakpoints: 
+              //   { create_derived: true, 
+              //   bytes_step: 20000, 
+              //   min_width: 200, 
+              //   max_width: 1000 }})
+              //   .then(result=>console.log(result));
+
+              const resultCloudinary = await cloudinary.uploader
+              .upload(data[index].url)
+                .then(result=>
+                    {
+                      const imageIA = new imageResult({
+                        url: result.secure_url,
+                        isChecked:false
+                      });
+                      imageIA.save();
+                      arrayImageId.push(imageIA);
+                    }                  
+                  );
+          };
+
+          if (arrayImageId.length > 0) {
+            const newQuery = new SearchImg({
+              user_id: theUser._id,
+              textSearch: queryKey,
+              dateSearch: Date.now(),
+              imageResult: arrayImageId.map((val) => val._id),
+            });
+
+            newQuery.save().then((newDoc) => {
+              res.json({ result: true, data: newDoc });
+            });
+          } else {
+            res.json({ result: false, data: [] });
+          }
+            
+      } else {
+        if (theUser && !theUser.nbRequest > 0) {
+          res.json({ result: false, error: "No credits" });
+        } else {
+          res.json({ result: false, error: "User not found" });
+        }
+      }
+    }
+  }
+  );
+  } catch (error) {
+    res.json({ result: false, error: `User not found   ==> ${error}` });
+  }
+});
+
+
+router.post("/checked", (req, res, next) => {
+  if (!checkBody(req.body, ["imageId", "token", "isLiked"])) {
+    res.json({ result: false, error: "Missing or empty fields" });
+    console.log("invalid inputs", req.body);
+    return;
+  }
+  const { token, imageId, isLiked } = req.body;
+  console.log(isLiked, "toto");
+  User.findOne({ token: token }).then((theUser) => {
+    imageResult
+      .updateOne({ _id: imageId }, { isChecked: isLiked })
+      .then((updaeDoc) => {
+        res.json({ result: true });
+      });
+  });
+});
+
+
+
+
+router.post("/LoaclStorage", (req, res, next) => {
   try {
     if (!checkBody(req.body, ["queryKey", "token"])) {
       res.json({ result: false, error: "Missing or empty fields" });
@@ -81,6 +178,7 @@ router.post("/", (req, res, next) => {
             for (const newUrl of tabImgUp) {
               const imageIA = new imageResult({
                 url: newUrl,
+                isChecked:false
               });
               imageIA.save();
               arrayImageId.push(imageIA);
@@ -124,23 +222,6 @@ router.post("/", (req, res, next) => {
   } catch (error) {
     res.json({ result: false, error: `User not found   ==> ${error}` });
   }
-});
-
-router.post("/checked", (req, res, next) => {
-  if (!checkBody(req.body, ["imageId", "token", "isLiked"])) {
-    res.json({ result: false, error: "Missing or empty fields" });
-    console.log("invalid inputs", req.body);
-    return;
-  }
-  const { token, imageId, isLiked } = req.body;
-  console.log(isLiked, "toto");
-  User.findOne({ token: token }).then((theUser) => {
-    imageResult
-      .updateOne({ _id: imageId }, { isChecked: isLiked })
-      .then((updaeDoc) => {
-        res.json({ result: true });
-      });
-  });
 });
 
 module.exports = router;

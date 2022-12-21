@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const paymentSchema = mongoose.Schema({
     paymentType: String,
     fullName: String, 
-    expirationDate: Date, 
+    expirationDate: String, 
     isDefault: Boolean, 
 });
 //const Payment = mongoose.model('payments', paymentSchema);
