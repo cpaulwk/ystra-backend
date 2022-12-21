@@ -68,7 +68,8 @@ router.post("/", (req, res, next) => {
             });
 
             newQuery.save().then((newDoc) => {
-              res.json({ result: true, data: newDoc });
+              res.json({ result: true, data: arrayImageId });
+              //res.json({ result: true, data: newDoc });
             });
           } else {
             res.json({ result: false, data: [] });
