@@ -12,13 +12,13 @@ const orderSchema = mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref:'users'},
     orderNumber: String, 
     purchaseDate: Date, 
-    orderItems:{ type: [Items.Schema], required: true },
-    orderStatus: { type: [statusSchema], required: true }, 
+    orderItems:{ type: [Items.Schema], required: false },
+    orderStatus: { type: [statusSchema], required: false }, 
     isCanceled: Boolean,
     cancelDate: Date,
-    addressBilling:{ type: addressSchema, required: true } ,
-    addressDelivery:{ type: addressSchema, required: true },   /*[id, street, zipCode, city, state, country, phoneNumber, isForBilling, isForDelivery, isDefault, isDeleted,]*/
-    paymentType: { type: paymentTypeSchema, required: true } , /*[payment]*/
+    addressBilling:{ type: addressSchema, required: false } ,
+    addressDelivery:{ type: addressSchema, required: false },   /*[id, street, zipCode, city, state, country, phoneNumber, isForBilling, isForDelivery, isDefault, isDeleted,]*/
+    paymentType: { type: paymentTypeSchema, required: false } , /*[payment]*/
     isPaid: Boolean, 
     paidDate: Date, 
 });
