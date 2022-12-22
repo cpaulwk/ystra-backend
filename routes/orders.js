@@ -31,7 +31,7 @@ router.get('/:token', (req, res)=>{
 
 router.post ('/new',(req,res)=>{
   console.log(req.body);
-  const {token, basket,addressBilling,addressDelivery,paymentType } = req.body;
+  const {token, basket,addressBilling,addressDelivery,paymentType,TotalPrice } = req.body;
   User.findOne({token:token}).then(data=>{
     if(data){
 
@@ -74,6 +74,7 @@ router.post ('/new',(req,res)=>{
         addressDelivery:newAddress,   /*[id, street, zipCode, city, state, country, phoneNumber, isForBilling, isForDelivery, isDefault, isDeleted,]*/
         paymentType: newPay , /*[payment]*/
         isPaid: true, 
+        TotalPrice:TotalPrice,
         paidDate: Date.now(), 
 
       })
