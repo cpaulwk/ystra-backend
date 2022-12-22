@@ -20,7 +20,7 @@ const orderSchema = mongoose.Schema({
     addressDelivery:{ type: addressSchema, required: false },   /*[id, street, zipCode, city, state, country, phoneNumber, isForBilling, isForDelivery, isDefault, isDeleted,]*/
     paymentType: { type: paymentTypeSchema, required: false } , /*[payment]*/
     isPaid: Boolean, 
-    TotalPrice: Number,
+    totalPrice: Number,
     paidDate: Date, 
 });
 
