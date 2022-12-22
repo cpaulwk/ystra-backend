@@ -51,6 +51,16 @@ router.post ('/signin',(req,res)=>{
     }
   })
 })
+router.get('/:token',(req, res) =>{
+  User.findOne({token : req.params.token}).then(data=>{
+    if (data){
+      res.json({result:true , user : {username:data.username,email:data.email,password:data.password}});
+    }else {
+      res.json({ result: false, error: 'User not found' });
+    }
+  })
+
+})
 
 /* GET address listing. */
 router.get('/addresses/:token', (req, res)=> {
