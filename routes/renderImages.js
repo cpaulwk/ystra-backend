@@ -13,7 +13,6 @@ const User = require("../models/users");
 
 // const apiKey='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';
 
-
 router.post("/", (req, res, next) => {
   try {
     if (!checkBody(req.body, ["queryKey", "token"])) {
@@ -25,7 +24,7 @@ router.post("/", (req, res, next) => {
         const { queryKey } = req.body;
 
         let ImagAI = new ApiOpenai();
-        await ImagAI.generate(queryKey, 4, ""); 
+        await ImagAI.generate(queryKey, 4, "");
         if (ImagAI.Result) {
           User.updateOne(
             { _id: theUser._id },
@@ -34,30 +33,28 @@ router.post("/", (req, res, next) => {
 
           const { data } = ImagAI.Result;
           let arrayImageId = [];
-          for (let index = 0; index < data.length; index++) {     
-              //const resultCloudinary = await cloudinary.uploader.upload(photoPath);
-              // const resultCloudinary = await cloudinary.uploader
-              // .upload(data[index].url,
-              //   { responsive_breakpoints: 
-              //   { create_derived: true, 
-              //   bytes_step: 20000, 
-              //   min_width: 200, 
-              //   max_width: 1000 }})
-              //   .then(result=>console.log(result));
+          for (let index = 0; index < data.length; index++) {
+            //const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+            // const resultCloudinary = await cloudinary.uploader
+            // .upload(data[index].url,
+            //   { responsive_breakpoints:
+            //   { create_derived: true,
+            //   bytes_step: 20000,
+            //   min_width: 200,
+            //   max_width: 1000 }})
+            //   .then(result=>console.log(result));
 
-              const resultCloudinary = await cloudinary.uploader
+            const resultCloudinary = await cloudinary.uploader
               .upload(data[index].url)
-                .then(result=>
-                    {
-                      const imageIA = new imageResult({
-                        url: result.secure_url,
-                        isChecked:false
-                      });
-                      imageIA.save();
-                      arrayImageId.push(imageIA);
-                    }                  
-                  );
-          };
+              .then((result) => {
+                const imageIA = new imageResult({
+                  url: result.secure_url,
+                  isChecked: false,
+                });
+                imageIA.save();
+                arrayImageId.push(imageIA);
+              });
+          }
 
           if (arrayImageId.length > 0) {
             const newQuery = new SearchImg({
@@ -74,22 +71,19 @@ router.post("/", (req, res, next) => {
           } else {
             res.json({ result: false, data: [] });
           }
-            
-      } else {
-        if (theUser && !theUser.nbRequest > 0) {
-          res.json({ result: false, error: "No credits" });
         } else {
-          res.json({ result: false, error: "User not found" });
+          if (theUser && !theUser.nbRequest > 0) {
+            res.json({ result: false, error: "No credits" });
+          } else {
+            res.json({ result: false, error: "User not found" });
+          }
         }
       }
-    }
-  }
-  );
+    });
   } catch (error) {
     res.json({ result: false, error: `User not found   ==> ${error}` });
   }
 });
-
 
 router.post("/checked", (req, res, next) => {
   if (!checkBody(req.body, ["imageId", "token", "isLiked"])) {
@@ -107,9 +101,6 @@ router.post("/checked", (req, res, next) => {
       });
   });
 });
-
-
-
 
 router.post("/LoaclStorage", (req, res, next) => {
   try {
@@ -179,11 +170,7 @@ router.post("/LoaclStorage", (req, res, next) => {
             for (const newUrl of tabImgUp) {
               const imageIA = new imageResult({
                 url: newUrl,
-<<<<<<< HEAD
                 isChecked: false,
-=======
-                isChecked:false
->>>>>>> 10d1c54a2fb2680f3effb74095dc1ec9b8635eb7
               });
               imageIA.save();
               arrayImageId.push(imageIA);
