@@ -74,7 +74,7 @@ router.post ('/new',(req,res)=>{
         addressDelivery:newAddress,   /*[id, street, zipCode, city, state, country, phoneNumber, isForBilling, isForDelivery, isDefault, isDeleted,]*/
         paymentType: newPay , /*[payment]*/
         isPaid: true, 
-        TotalPrice:TotalPrice,
+        totalPrice:totalPrice,
         paidDate: Date.now(), 
 
       })
