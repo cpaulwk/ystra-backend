@@ -23,7 +23,8 @@ router.post('/signup',(req, res) =>{
         password: hash,
         email: email,
         token: uid2(32),
-        nbRequest:10 
+        nbRequest:10, 
+        wallet:''
       })
 
       newUser.save().then((newDoc)=>{
@@ -152,5 +153,21 @@ router.post('/payamenttype/',(req,res)=>{
     }
   })  
 })
+
+/* POST WALLET Type listing. */
+router.post('/wallet',(req, res) =>{
+  if (!checkBody(req.body, ['token', 'wallet'])) {
+    res.json({ result: false, error: 'Missing or empty fields' });
+    return;
+  }
+  const {token, wallet}=req.body;
+  User.updateOne({ token:token }, { wallet:wallet }).then(newDoc=>{
+    console.log('kkk',token,wallet)
+        res.json({result:true, token : newDoc.token});
+  })
+
+})
+
+
 
 module.exports = router;

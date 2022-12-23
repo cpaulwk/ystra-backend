@@ -19,6 +19,7 @@ const userSchema = mongoose.Schema({
     profileImage: String, 
     paymentType: { type: [paymentTypeSchema.schema], required: true } , /*[payment]*/
     nbRequest: Number, 
+    wallet: String
 });
 
 

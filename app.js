@@ -11,6 +11,7 @@ var renderImagesRouter = require("./routes/renderImages");
 var ordersRouter = require("./routes/orders");
 var userGalleryRouter= require("./routes/userGallery");
 var productsRouter= require("./routes/products");
+var walletRouter= require("./routes/wallet");
 var app = express();
 
 
@@ -29,4 +30,5 @@ app.use("/renderimages",renderImagesRouter);
 app.use("/orders", ordersRouter);
 app.use("/gallery",userGalleryRouter);
 app.use("/products", productsRouter);
+app.use("/wallet",walletRouter);
 module.exports = app;
