@@ -44,7 +44,6 @@ router.post("/", (req, res, next) => {
               //   min_width: 200, 
               //   max_width: 1000 }})
               //   .then(result=>console.log(result));
-
               const resultCloudinary = await cloudinary.uploader
               .upload(data[index].url)
                 .then(result=>
@@ -69,7 +68,7 @@ router.post("/", (req, res, next) => {
 
             newQuery.save().then((newDoc) => {
               res.json({ result: true, data: arrayImageId });
-              //res.json({ result: true, data: newDoc });
+                            //res.json({ result: true, data: newDoc });
             });
           } else {
             res.json({ result: false, data: [] });
