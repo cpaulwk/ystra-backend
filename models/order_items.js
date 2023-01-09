@@ -9,6 +9,7 @@ const itemSchema = new mongoose.Schema({
 
 const orderItemSchema = mongoose.Schema({
 imageResult_id: { type: mongoose.Schema.Types.ObjectId, ref:'imageresults'},
+url: String,
 price: Number, 
 product: {
             size: itemSchema,

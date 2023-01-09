@@ -10,9 +10,9 @@ const  paymentTypeSchema= require('../models/payments');
 
 /* GET CONNECTION. */
 router.post('/signup',(req, res) =>{
+
   if (!checkBody(req.body, ['username', 'password','email'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
-    return;
+    return res.status(400).send({  result: false, error: 'Missing or empty fields' });
   }
   const {username, password,email}=req.body;
   User.findOne({ $or: [{ username:username }, { email:email }] }).then(data=>{
@@ -23,59 +23,74 @@ router.post('/signup',(req, res) =>{
         password: hash,
         email: email,
         token: uid2(32),
-        nbRequest:10 
+        nbRequest:10, 
+        wallet:''
       })
 
       newUser.save().then((newDoc)=>{
         res.json({result:true, token : newDoc.token});
       })
     } else {
-      res.json({ result: false, error: 'User already exists' });
+      res.status(400).send({  result: false, error: 'User already exists' })
     }
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
   })
+
 
 })
 
 router.post ('/signin',(req,res)=>{
-  if (!checkBody(req.body, ['username','password'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
-    return;
-  }
+
+  if (!checkBody(req.body, ['username','password'])) {    
+    return res.status(400).send({ result: false, error: 'Missing or empty fields' })
+  }  
 
   const {username, password}=req.body;
   User.findOne({username:username}).then(data=>{
     if (data && bcrypt.compareSync(password, data.password)) {
       res.json({ result: true, token: data.token });
     } else {
-      res.json({ result: false, error: 'User not found or wrong password' });
+      //User not found or wrong password
+      res.status(401).send({ result: false, error: 'User not found' })
     }
+  }).catch(error=>{
+    res.status(400).send({ result: false, error: error.message })
   })
+
 })
-router.get('/:token',(req, res) =>{
-  User.findOne({token : req.params.token}).then(data=>{
-    if (data){
-      res.json({result:true , user : {username:data.username,email:data.email,password:data.password}});
-    }else {
-      res.json({ result: false, error: 'User not found' });
-    }
-  })
+
+router.get('/infos/:token',(req, res) =>{
+
+    User.findOne({token : req.params.token}).then(data=>{
+      if (data){
+        res.json({result:true , user : {username:data.username,email:data.email,password:data.password}});
+      }else {
+        res.status(401).send({ result: false, error: 'User not found' })
+      }
+    }).catch(error=>{
+      res.status(500).send({ result: false, error: error.message })
+    })
 
 })
 
 /* GET address listing. */
 router.get('/addresses/:token', (req, res)=> {
+
   User.findOne({token : req.params.token}).then(data=>{
     if (data){
-      res.json({addresses: data.address});
+      res.json({result:true, addresses: data.address});
     }else {
-      res.json({ result: false, error: 'User not found' });
+      res.status(401).send({ result: false, error: 'User not found' })
     }
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
   })
 
 });
 
 router.post('/addresses/',(req,res)=>{
-  // ['addressName',
+  // const fields = ['addressName',
   //   'street', 
   //   'zipCode', 
   //   'city', 
@@ -86,9 +101,9 @@ router.post('/addresses/',(req,res)=>{
   //   'isForDelivery',
   //   'isDefault',
   //   'isDeleted',]
+
   if (!checkBody(req.body, ['token','addressName','street'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
-    return;
+    return res.status(400).send({  result: false, error: 'Missing or empty fields' });
   }
   User.findOne({token:req.body.token}).then(data=>{
     if (data){
@@ -111,46 +126,72 @@ router.post('/addresses/',(req,res)=>{
       })
 
     }else{
-      res.json({ result: false, error: 'User not found' });
+      res.status(401).send({ result: false, error: 'User not found' })
     }
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
   })
+
 
 
 })
 
 /* GET Payement Type listing. */
-router.get('/payamenttype/:token',(req,res)=>{
+router.get('/paymenttype/:token',(req,res)=>{
+
   User.findOne({token : req.params.token}).then(data=>{
     if (data){
-      res.json({paymentType: data.paymentType});
+      res.json({result:true,paymentType: data.paymentType});
     }else {
-      res.json({ result: false, error: 'User not found' });
+      res.status(401).send({ result: false, error: 'User not found' })
     }
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
   })
+
 }) 
 
-router.post('/payamenttype/',(req,res)=>{
+router.post('/paymenttype/',(req,res)=>{
+
   if (!checkBody(req.body, ['token','paymentType','fullName','expirationDate'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
-    return;
+    return res.status(400).send({  result: false, error: 'Missing or empty fields' });
   }
   User.findOne({token:req.body.token}).then(data=>{
     if (data){
-      const newPayementType={
+      const newPaymentType={
           paymentType: req.body.paymentType,
           fullName: req.body.fullName, 
           expirationDate: req.body.expirationDate, 
           isDefault: req.body.isDefault, 
       }
-      data.paymentType.push(newPayementType);
+      data.paymentType.push(newPaymentType);
       data.save().then(updateDoc=>{
         res.json({result:true, paymentType:data.paymentType})
       })
 
     }else{
-      res.json({ result: false, error: 'User not found' });
+      res.status(401).send({ result: false, error: 'User not found' })
     }
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
   })  
+
+})
+
+/* POST WALLET Type listing. */
+router.post('/wallet',(req, res) =>{
+
+  if (!checkBody(req.body, ['token', 'wallet'])) {
+    return res.status(400).send({  result: false, error: 'Missing or empty fields' });
+  }
+  const {token, wallet}=req.body;
+  User.updateOne({ token:token }, { wallet:wallet }).then(newDoc=>{
+    console.log('Infos Wallet',token,wallet)
+        res.json({result:true, token : newDoc.token});
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
+  })
+
 })
 
 module.exports = router;

@@ -7,26 +7,19 @@ var Order= require('../models/orders');
 const Address = require('../models/address');
 const  Payment= require('../models/payments');
 
-router.get('/all', (req, res)=>{
-  Order.find().then(data=> {
-    res.json({allOrders: data })
-  });
-});
-
-router.get('/:token', (req, res)=>{
-  // if (!checkBody(req.body, ["queryKey", "token"])) {
-  //   res.json({ result: false, error: "Missing or empty fields" });
-  //   return;
-  // }
+router.get('/all/:token', (req, res)=>{
   User.findOne({token:req.params.token}).then(data=>{
     if (data){    
       Order.find({user:data._id}).then(data=> {
         res.json({allOrders: data })
       });
     }else{
-      res.json({ result: false, error: 'User not found' });
+      res.status(401).send({ result: false, error: 'User not found' })
     }
-  });
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
+  })
+
 });
 
 router.post ('/new',(req,res)=>{
@@ -56,14 +49,11 @@ router.post ('/new',(req,res)=>{
         isDefault: addressDelivery?.isDefault || false,
         isDeleted: addressDelivery?.isDeleted || false,
       };
-      // User.address.push(newAddress);
-      // User.save();
       
       const newOrder=new Order({
         user: data._id,
         orderNumber: `OD${uniqid()}`, 
         purchaseDate: Date.now(), 
-        // orderItems : tab1,
         orderStatus: {               
                     status: 'Order',
                     statusDate : Date.now(),
@@ -79,33 +69,21 @@ router.post ('/new',(req,res)=>{
 
       })
 
-      // const tabItems= basket.map(items=>{
-      //   console.log('basket==>',items.product)
-      //   return (
-      //     {
-      //       imageResult_id: items.imageResult_id,          
-      //       price: items.price, 
-      //       product: items.product,  
-      //       quantity: items.quantity
-      //     }
-      //   )
-      // });
-
       basket.forEach(element => {
         newOrder.orderItems.push(element);
       });
-
-      //newOrder.orderItems.push([...tabItems]);
-      // newOrder.orderItems=tabItems;
  
       newOrder.save().then((newDoc)=>{
         res.json({result:true, Order : newDoc});
       })
 
     }else{
-        res.json({ result: false, error: 'User not found' });
+        res.status(401).send({ result: false, error: 'User not found' })
     }
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
   })
+
 
 });
 

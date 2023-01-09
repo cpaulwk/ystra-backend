@@ -24,7 +24,7 @@ router.post("/", (req, res, next) => {
         const { queryKey } = req.body;
 
         let ImagAI = new ApiOpenai();
-        await ImagAI.generate(queryKey, 4, "");
+        await ImagAI.generate(queryKey, 4, ""); 
         if (ImagAI.Result) {
           User.updateOne(
             { _id: theUser._id },
@@ -217,3 +217,4 @@ router.post("/LoaclStorage", (req, res, next) => {
 });
 
 module.exports = router;
+

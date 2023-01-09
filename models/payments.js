@@ -5,6 +5,5 @@ const paymentSchema = mongoose.Schema({
     expirationDate: String, 
     isDefault: Boolean, 
 });
-//const Payment = mongoose.model('payments', paymentSchema);
 
 module.exports = paymentSchema;
