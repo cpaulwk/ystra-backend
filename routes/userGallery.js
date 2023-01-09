@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-const {checkBody} =require('../modules/checkBody');
 
 const SearchImg= require('../models/searchs');
 const User= require('../models/users');
@@ -13,16 +12,12 @@ router.get('/all/:token',(req,res)=>{
                 res.json({result:true, Images: data  })
             })
         }else{
-            res.json({ result: false, error: 'User not found' });
+            res.status(401).send({ result: false, error: 'User not found' })
         }
+    }).catch(error=>{
+        res.status(500).send({ result: false, error: error.message })
     })
 
 })
-
-
-
-
-
-
 
 module.exports= router;
