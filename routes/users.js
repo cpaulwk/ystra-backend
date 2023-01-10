@@ -3,18 +3,25 @@ var router = express.Router();
 const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
 const { checkBody } = require('../modules/checkBody');
-var User = require('../models/users');
-var addressSchema= require('../models/address');
+const User = require('../models/users');
+const addressSchema= require('../models/address');
 const  paymentTypeSchema= require('../models/payments');
 
+// Grabbed from emailregex.com
+const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 /* GET CONNECTION. */
 router.post('/signup',(req, res) =>{
 
   if (!checkBody(req.body, ['username', 'password','email'])) {
-    return res.status(400).send({  result: false, error: 'Missing or empty fields' });
+    return res.status(400).send({ result: false, error: 'Missing or empty fields' });
   }
-  const {username, password,email}=req.body;
+  const {username, password, email}=req.body;
+
+  if (!EMAIL_REGEX.test(email)) {
+    return res.status(400).send({  result: false, error: 'Invalid email address' })
+  }
+
   User.findOne({ $or: [{ username:username }, { email:email }] }).then(data=>{
     if(data ===null) {     
       const hash = bcrypt.hashSync(password, 10);
@@ -30,14 +37,14 @@ router.post('/signup',(req, res) =>{
       newUser.save().then((newDoc)=>{
         res.json({result:true, token : newDoc.token});
       })
+
     } else {
       res.status(400).send({  result: false, error: 'User already exists' })
     }
   }).catch(error=>{
-    res.status(500).send({ result: false, error: error.message })
+    res.status(500).send({ result: false, error: error.message })    
   })
-
-
+  
 })
 
 router.post ('/signin',(req,res)=>{
@@ -47,6 +54,7 @@ router.post ('/signin',(req,res)=>{
   }  
 
   const {username, password}=req.body;
+  // User.findOne({email : { $regex: new RegExp(userEmail, 'i') }}).then(data=>{
   User.findOne({username:username}).then(data=>{
     if (data && bcrypt.compareSync(password, data.password)) {
       res.json({ result: true, token: data.token });
@@ -55,22 +63,22 @@ router.post ('/signin',(req,res)=>{
       res.status(401).send({ result: false, error: 'User not found' })
     }
   }).catch(error=>{
-    res.status(400).send({ result: false, error: error.message })
+    res.status(500).send({ result: false, error: error.message })
   })
 
 })
 
 router.get('/infos/:token',(req, res) =>{
 
-    User.findOne({token : req.params.token}).then(data=>{
-      if (data){
-        res.json({result:true , user : {username:data.username,email:data.email,password:data.password}});
-      }else {
-        res.status(401).send({ result: false, error: 'User not found' })
-      }
-    }).catch(error=>{
-      res.status(500).send({ result: false, error: error.message })
-    })
+  User.findOne({token : req.params.token}).then(data=>{
+    if (data){
+      res.json({result:true , user : {username:data.username,email:data.email,password:data.password}});
+    }else {
+      res.status(401).send({ result: false, error: 'User not found' })
+    }
+  }).catch(error=>{
+    res.status(500).send({ result: false, error: error.message })
+  })
 
 })
 
@@ -105,6 +113,7 @@ router.post('/addresses/',(req,res)=>{
   if (!checkBody(req.body, ['token','addressName','street'])) {
     return res.status(400).send({  result: false, error: 'Missing or empty fields' });
   }
+
   User.findOne({token:req.body.token}).then(data=>{
     if (data){
       const newAddress = {
@@ -120,9 +129,13 @@ router.post('/addresses/',(req,res)=>{
         isDefault: req.body.isDefault,
       };
 
+      // User.updateOne({token:req.body.token},{$push :{address:newAddress}}).then(data=>{
+      //   res.json({result:true, addresses:data})
+      // })
+
       data.address.push(newAddress);
       data.save().then(updateDoc=>{
-        res.json({result:true, addresses:data.address})
+        res.json({result:true, addresses:updateDoc.address})
       })
 
     }else{

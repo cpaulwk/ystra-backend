@@ -2,7 +2,6 @@ var express = require("express");
 var router = express.Router();
 const { checkBody } = require("../modules/checkBody");
 const { ApiOpenai } = require("../classes/csOpenai");
-const uniqid = require("uniqid");
 const cloudinary = require("cloudinary").v2;
 
 const imageResult = require("../models/image_results");
@@ -35,12 +34,12 @@ router.post("/", (req, res, next) => {
                 .upload(data[index].url)
                   .then(result=>
                       {
-                        const imageIA = new imageResult({
+                        const newImageResult = new imageResult({
                           url: result.secure_url,
                           isChecked:false
                         });
-                        imageIA.save();
-                        arrayImageId.push(imageIA);
+                        newImageResult.save();
+                        arrayImageId.push(newImageResult);
                       }                  
                     );
             };
@@ -54,10 +53,10 @@ router.post("/", (req, res, next) => {
               });
 
               newQuery.save().then((newDoc) => {
-                res.json({ result: true, data: arrayImageId });
+                res.json({ result: true, imagesUrl: arrayImageId });
               });
             } else {
-              res.json({ result: false, data: [] });
+              res.json({ result: false, imagesUrl: [] });
             }
           }  
           

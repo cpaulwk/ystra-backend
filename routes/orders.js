@@ -2,12 +2,13 @@ var express = require('express');
 var router = express.Router();
 const {checkBody} =require('../modules/checkBody');
 const uniqid = require("uniqid");
-var User = require('../models/users');
-var Order= require('../models/orders');
+const User = require('../models/users');
+const Order= require('../models/orders');
 const Address = require('../models/address');
 const  Payment= require('../models/payments');
 
 router.get('/all/:token', (req, res)=>{
+
   User.findOne({token:req.params.token}).then(data=>{
     if (data){    
       Order.find({user:data._id}).then(data=> {
