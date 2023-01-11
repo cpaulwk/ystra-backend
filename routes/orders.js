@@ -11,7 +11,7 @@ router.get('/all/:token', (req, res)=>{
 
   User.findOne({token:req.params.token}).then(data=>{
     if (data){    
-      Order.find({user:data._id}).then(data=> {
+      Order.find({user:data._id}).sort({purchaseDate:'desc'}).then(data=> {
         res.json({allOrders: data })
       });
     }else{
