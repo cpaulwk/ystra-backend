@@ -185,10 +185,10 @@ router.post("/LoaclStorage", (req, res, next) => {
               });
 
               newQuery.save().then((newDoc) => {
-                res.json({ result: true, data: arrayImageId });
+                res.json({ result: true, imagesUrl: arrayImageId });
               });
             } else {
-              res.json({ result: false, data: [] });
+              res.json({ result: false, imagesUrl: [] });
             }
           }
 
