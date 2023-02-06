@@ -13,7 +13,7 @@ const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"
 /* GET CONNECTION. */
 router.post('/signup',(req, res) =>{
 
-  if (!checkBody(req.body, ['username', 'password','email'])) {
+  if (!checkBody(req.body, ['password','email'])) {
     return res.status(400).send({ result: false, error: 'Missing or empty fields' });
   }
   const {username, password, email}=req.body;
@@ -22,7 +22,8 @@ router.post('/signup',(req, res) =>{
     return res.status(400).send({  result: false, error: 'Invalid email address' })
   }
 
-  User.findOne({ $or: [{ username:username }, { email:email }] }).then(data=>{
+  // { $or: [{ username:username }, { email:email }] } 
+  User.findOne({ email:email }).then(data=>{
     if(data ===null) {     
       const hash = bcrypt.hashSync(password, 10);
       const newUser=new User({
@@ -49,13 +50,13 @@ router.post('/signup',(req, res) =>{
 
 router.post ('/signin',(req,res)=>{
 
-  if (!checkBody(req.body, ['username','password'])) {    
+  if (!checkBody(req.body, ['email','password'])) {    
     return res.status(400).send({ result: false, error: 'Missing or empty fields' })
   }  
 
-  const {username, password}=req.body;
+  const {email, password}=req.body;
   // User.findOne({email : { $regex: new RegExp(userEmail, 'i') }}).then(data=>{
-  User.findOne({username:username}).then(data=>{
+  User.findOne({email:email}).then(data=>{
     if (data && bcrypt.compareSync(password, data.password)) {
       res.json({ result: true, token: data.token });
     } else {
