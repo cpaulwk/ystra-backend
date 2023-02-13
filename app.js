@@ -12,6 +12,7 @@ var ordersRouter = require("./routes/orders");
 var userGalleryRouter= require("./routes/userGallery");
 var productsRouter= require("./routes/products");
 var walletRouter= require("./routes/wallet");
+var payementRouter= require ("./routes/payement.js");
 var app = express();
 
 
@@ -31,4 +32,5 @@ app.use("/orders", ordersRouter);
 app.use("/gallery",userGalleryRouter);
 app.use("/products", productsRouter);
 app.use("/wallet",walletRouter);
+app.use("/payement", payementRouter);
 module.exports = app;
