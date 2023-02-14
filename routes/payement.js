@@ -19,7 +19,7 @@ router.post('/payment-sheet', async (req, res) => {
 
     const customer = await stripe.customers.create({
       description: 'My First Test Customer',
-      email : 'popo@mimi.com',
+      email : email,
       name: 'PoPO' 
     })
 
@@ -43,7 +43,7 @@ router.post('/payment-sheet', async (req, res) => {
       paymentIntent: paymentIntent.client_secret,
       ephemeralKey: ephemeralKey.secret,
       customer: customer.id,
-      publishableKey: process.env.STRIPE_PUBLISHABLEKEY
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
     });
   });
 
