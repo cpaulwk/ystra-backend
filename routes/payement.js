@@ -10,16 +10,16 @@ router.post('/payment-sheet', async (req, res) => {
     const {amount,email}= req.body;
     myAmount=amount;
 
-    const customer1 = await stripe.customers.search({
-      query: 'name:\'titi\' AND email:\'toto@mimi.com\'',
-    });
+    // const customer1 = await stripe.customers.search({
+    //   query: 'name:\'titi\' AND email:\'toto@mimi.com\'',
+    // });
 
-    console.log('customer1',customer1.data.id)
+    // console.log('customer1',customer1.data.id)
 
 
     const customer = await stripe.customers.create({
       description: 'My First Test Customer',
-      email : 'popo@mimi.com',
+      email : email,
       name: 'PoPO' 
     })
 
@@ -43,7 +43,7 @@ router.post('/payment-sheet', async (req, res) => {
       paymentIntent: paymentIntent.client_secret,
       ephemeralKey: ephemeralKey.secret,
       customer: customer.id,
-      publishableKey: process.env.STRIPE_PUBLISHABLEKEY
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
     });
   });
 
