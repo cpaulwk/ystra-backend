@@ -3,10 +3,8 @@ const { Configuration, OpenAIApi } = require("openai");
 class ApiOpenai {
   constructor() {
     this.configuration = new Configuration({
-      apiKey:
-        // process.env.OPENAI_API_KEY ||
-        // "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",
-        process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY,
+      organization: "org-Zjueg7FSEvPEAGWhYGqcHvtT",
     });
   }
 
