@@ -21,6 +21,7 @@ router.post("/", (req, res, next) => {
       return;
     }
     User.findOne({ token: req.body.token }).then(async (theUser) => {
+      console.log("reached this line");
       if (theUser && theUser.nbRequest > 0) {
         const { queryKey } = req.body;
 
