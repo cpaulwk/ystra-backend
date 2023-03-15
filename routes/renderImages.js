@@ -95,12 +95,10 @@ router.post("/checked", (req, res, next) => {
   }
   const { token, imageId, isLiked } = req.body;
   console.log(isLiked, "toto");
-  User.findOne({ token: token }).then((theUser) => {
+  User.findOne({ token: token }).then(() => {
     imageResult
       .updateOne({ _id: imageId }, { isChecked: isLiked })
-      .then((updaeDoc) => {
-        res.json({ result: true });
-      });
+      .then(() => res.json({ result: true }));
   });
 });
 
